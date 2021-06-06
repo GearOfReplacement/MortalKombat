@@ -56,40 +56,21 @@ const createPlayer = function( playerObj ) {
 $arenas.appendChild( createPlayer( firstPlayer ) );
 $arenas.appendChild( createPlayer( secondPlayer ) );
 
-$button.addEventListener( 'click', () => { changeHp( firstPlayer, secondPlayer ) });
+$button.addEventListener( 'click', () => {
+    changeHp( firstPlayer );
+    changeHp( secondPlayer );
+    checkWinner( firstPlayer, secondPlayer );
+});
 
-const changeHp = function ( firstPlayerObj, secondPlayerObj ) {
-    let selectedPlayer = selectPlayer();
-    let $hpCount = document.querySelector( '.player' + selectedPlayer + ' .life' );
-
-    if( selectedPlayer === 1 ) {
-        firstPlayerObj.hp -= getDamadge();
-        
-        if( firstPlayerObj.hp <= 0 ){
-            firstPlayerObj.hp = 0;
-            
-            $arenas.appendChild( getWinTitle( secondPlayerObj ) );
-            $button.disabled = true;
-        }
-
-        $hpCount.style.width = firstPlayerObj.hp + '%';
-    }
-    else if ( selectedPlayer === 2) {
-        secondPlayerObj.hp -= getDamadge();
-
-        if( secondPlayerObj.hp <= 0 ){
-            secondPlayerObj.hp = 0;
-            
-            $arenas.appendChild( getWinTitle( firstPlayerObj ) );
-            $button.disabled = true;
-        }
-
-        $hpCount.style.width = secondPlayerObj.hp + '%';
-    }
+const changeHp = function ( playerObj ) {
+    let $playerLife = document.querySelector( '.player' + playerObj.player + ' .life' );
+    playerObj.hp -= getDamadge();
+    checkLife( playerObj );
+    $playerLife.style.width = playerObj.hp + '%';
 }
 
-const selectPlayer = function () {
-    return Math.ceil( Math.random() * 2 );
+const checkLife = function ( playerObj ) {
+    if( playerObj.hp <= 0 ) playerObj.hp = 0;
 }
 
 const getDamadge = function () {
@@ -103,8 +84,23 @@ const getWinTitle = function ( playerObj ) {
     return $winTitle;
 }
 
-const getLoseTitle = function( playerObj ) {
-    let $loseTitle = getElement( 'div', 'loseTitle' );
-    $loseTitle.innerText = playerObj.name + ' lose';
-    return $loseTitle;
+const getDrawTitle = function () {
+    let $drawTitle = getElement( 'div', 'drawTitle' );
+    $drawTitle.innerText = 'Draw?';
+    return $drawTitle;
+}
+
+const checkWinner = function ( firstPlayerObj, secondPlayerObj ) {
+    if( firstPlayerObj.hp == 0 && secondPlayerObj.hp == 0 ) {
+        $arenas.appendChild( getDrawTitle() );
+        $button.disabled = true;
+    }
+    else if ( firstPlayerObj.hp == 0 ) {
+        $arenas.appendChild( getWinTitle ( secondPlayerObj ) );
+        $button.disabled = true;
+    }
+    else if ( secondPlayerObj.hp == 0 ) {
+        $arenas.appendChild( getWinTitle( firstPlayerObj ) );
+        $button.disabled = true;
+    }
 }
