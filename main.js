@@ -8,8 +8,12 @@ let firstPlayer = {
     img: 'http://reactmarathon-api.herokuapp.com/assets/subzero.gif',
     weapon: ['Arms', 'Legs', 'Blizzard', 'Fatal Combo'],
     attack: function() {
-        alert(firstPlayer.name + ' fight!');
-    }
+        alert(this.name + ' fight!');
+    },
+
+    changeHp: changeHp,
+    elHP: elHP, 
+    renderHP: renderHP,
 }
 
 let secondPlayer = {
@@ -19,17 +23,21 @@ let secondPlayer = {
     img: 'http://reactmarathon-api.herokuapp.com/assets/sonya.gif',
     weapon: ['Arms', 'Legs', 'Maybe some guns', 'Fatal Combo'],
     attack: function() {
-        alert(secondPlayer.name + ' fight!');
-    }
+        alert(this.name + ' fight!');
+    },
+
+    changeHp: changeHp,
+    elHP: elHP, 
+    renderHP: renderHP,
 }
 
-const getElement = function( tagName, className ) {
+function getElement ( tagName, className ) {
     let $element = document.createElement(tagName);
     if(className) $element.classList.add(className);
     return $element;
 }
 
-const createPlayer = function( playerObj ) {
+function createPlayer ( playerObj ) {
     let $player = getElement('div', 'player' + playerObj.player);
     let $progressBar = getElement('div', 'progressbar');
     let $character = getElement('div', 'character');
@@ -53,54 +61,64 @@ const createPlayer = function( playerObj ) {
     return $player;
 }
 
+function createReloadButton () {
+    let $buttonWrapper = getElement( 'div', 'reloadWrap' );
+    let $reloadButton = getElement( 'button', 'button' );
+    $reloadButton.innerText = 'Reload';
+
+    $buttonWrapper.appendChild( $reloadButton );
+    $arenas.appendChild ( $buttonWrapper );
+
+    $reloadButton.addEventListener( 'click', () => { window.location.reload() } );
+}
+
+function changeHp ( damage ) {
+    this.hp -= damage;
+    if(this.hp < 0) this.hp = 0;
+}
+
+function elHP () {
+    return document.querySelector( '.player' + this.player + ' .life' );
+}
+
+function renderHP ( $lifeBar ) {
+    $lifeBar.style.width = this.hp + '%';
+}
+
+function getDamage () {
+    let damage = Math.ceil( Math.random() * 20 );
+    return damage;
+}
+
+function getTitle ( playerName ) {
+    let $title = getElement( 'div', 'resultTitle' );
+    if( playerName == 'Draw') $title.innerText = 'Draw';
+    else $title.innerText = playerName + ' wins';
+    return $title;
+}
+
+const getWinner = function ( firstPlayer, secondPlayer ) {
+    if( firstPlayer.hp == 0 && secondPlayer.hp == 0 ) return 'Draw';
+    else if ( firstPlayer.hp == 0 ) return secondPlayer.name;   
+    else if ( secondPlayer.hp == 0 ) return firstPlayer.name;
+    return 0;
+}
+
 $arenas.appendChild( createPlayer( firstPlayer ) );
 $arenas.appendChild( createPlayer( secondPlayer ) );
 
 $button.addEventListener( 'click', () => {
-    changeHp( firstPlayer );
-    changeHp( secondPlayer );
-    checkWinner( firstPlayer, secondPlayer );
+    firstPlayer.changeHp( getDamage() );
+    secondPlayer.changeHp( getDamage() );
+
+    firstPlayer.renderHP( firstPlayer.elHP() );
+    secondPlayer.renderHP( secondPlayer.elHP() );
+
+    const winner = getWinner( firstPlayer, secondPlayer );
+    if( winner ){
+        $arenas.appendChild( getTitle ( winner ) );
+        $button.disabled = true;
+        createReloadButton();
+    };
 });
 
-const changeHp = function ( playerObj ) {
-    let $playerLife = document.querySelector( '.player' + playerObj.player + ' .life' );
-    playerObj.hp -= getDamadge();
-    checkLife( playerObj );
-    $playerLife.style.width = playerObj.hp + '%';
-}
-
-const checkLife = function ( playerObj ) {
-    if( playerObj.hp <= 0 ) playerObj.hp = 0;
-}
-
-const getDamadge = function () {
-    let damadge = Math.ceil( Math.random() * 20 );
-    return damadge;
-}
-
-const getWinTitle = function ( playerObj ) {
-    let $winTitle = getElement( 'div', 'winTitle' );
-    $winTitle.innerText = playerObj.name + ' win';
-    return $winTitle;
-}
-
-const getDrawTitle = function () {
-    let $drawTitle = getElement( 'div', 'drawTitle' );
-    $drawTitle.innerText = 'Draw?';
-    return $drawTitle;
-}
-
-const checkWinner = function ( firstPlayerObj, secondPlayerObj ) {
-    if( firstPlayerObj.hp == 0 && secondPlayerObj.hp == 0 ) {
-        $arenas.appendChild( getDrawTitle() );
-        $button.disabled = true;
-    }
-    else if ( firstPlayerObj.hp == 0 ) {
-        $arenas.appendChild( getWinTitle ( secondPlayerObj ) );
-        $button.disabled = true;
-    }
-    else if ( secondPlayerObj.hp == 0 ) {
-        $arenas.appendChild( getWinTitle( firstPlayerObj ) );
-        $button.disabled = true;
-    }
-}
