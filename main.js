@@ -67,7 +67,9 @@ function createReloadButton () {
     $reloadButton.innerText = 'Reload';
 
     $buttonWrapper.appendChild( $reloadButton );
-    return $buttonWrapper;
+    $arenas.appendChild ( $buttonWrapper );
+
+    $reloadButton.addEventListener( 'click', () => { window.location.reload() } );
 }
 
 function changeHp ( damage ) {
@@ -115,11 +117,8 @@ $button.addEventListener( 'click', () => {
     const winner = getWinner( firstPlayer, secondPlayer );
     if( winner ){
         $arenas.appendChild( getTitle ( winner ) );
-        $arenas.appendChild( createReloadButton() );
         $button.disabled = true;
-        
-        const $reloadButton = document.querySelector('.reloadWrap .button');
-        $reloadButton.addEventListener( 'click', () => { window.location.reload() } );
+        createReloadButton();
     };
 });
 
