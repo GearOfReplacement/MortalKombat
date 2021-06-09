@@ -1,5 +1,13 @@
 const $arenas = document.querySelector('.arenas');
 const $button = document.querySelector('.button');
+const $fightForm = document.querySelector('.control');
+
+const ATTACK = ['head', 'body', 'foot'];
+const HIT = {
+    head: 30,
+    body: 25,
+    foot: 20,
+}
 
 let firstPlayer = {
     player: 1,
@@ -11,9 +19,9 @@ let firstPlayer = {
         alert(this.name + ' fight!');
     },
 
-    changeHp: changeHp,
-    elHP: elHP, 
-    renderHP: renderHP,
+    changeHp,
+    elHP, 
+    renderHP,
 }
 
 let secondPlayer = {
@@ -26,9 +34,9 @@ let secondPlayer = {
         alert(this.name + ' fight!');
     },
 
-    changeHp: changeHp,
-    elHP: elHP, 
-    renderHP: renderHP,
+    changeHp,
+    elHP, 
+    renderHP,
 }
 
 function getElement ( tagName, className ) {
@@ -85,9 +93,9 @@ function renderHP ( $lifeBar ) {
     $lifeBar.style.width = this.hp + '%';
 }
 
-function getDamage () {
-    let damage = Math.ceil( Math.random() * 20 );
-    return damage;
+function getRandom ( num ) {
+    let rndNum = Math.ceil( Math.random() * num );
+    return rndNum;
 }
 
 function getTitle ( playerName ) {
@@ -107,12 +115,14 @@ const getWinner = function ( firstPlayer, secondPlayer ) {
 $arenas.appendChild( createPlayer( firstPlayer ) );
 $arenas.appendChild( createPlayer( secondPlayer ) );
 
-$button.addEventListener( 'click', () => {
-    firstPlayer.changeHp( getDamage() );
-    secondPlayer.changeHp( getDamage() );
+$fightForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const enemy = enemyAttack ();
+    const player = playerAttack( e.target );
 
-    firstPlayer.renderHP( firstPlayer.elHP() );
-    secondPlayer.renderHP( secondPlayer.elHP() );
+    checkStrikes( enemy, player, firstPlayer );
+    checkStrikes( player, enemy, secondPlayer );
 
     const winner = getWinner( firstPlayer, secondPlayer );
     if( winner ){
@@ -122,3 +132,36 @@ $button.addEventListener( 'click', () => {
     };
 });
 
+function enemyAttack () {
+    let hit = ATTACK[ getRandom(3) - 1 ];
+    let defence = ATTACK[ getRandom(3) - 1 ];
+
+    return {
+        value: getRandom( HIT[hit] ),
+        hit, 
+        defence,
+    }
+}
+
+function playerAttack ( target ) {
+    const attack = {};
+
+    for( let item of target ) {
+        if( item.checked && item.name == 'hit' ) {
+            attack.value = getRandom( HIT[item.value] );
+            attack.hit = item.value;
+        }
+        if( item.checked && item.name == 'defence') attack.defence = item.value;
+
+        item.checked = false;
+    }
+
+    return attack;
+}
+
+function checkStrikes ( attackFighter, defendFighter, defendingPlayer ) {
+    if( attackFighter.hit != defendFighter.defence ){
+        defendingPlayer.changeHp( attackFighter.value );
+        defendingPlayer.renderHP( defendingPlayer.elHP() );
+    }
+}
