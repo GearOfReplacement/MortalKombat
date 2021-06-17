@@ -1,44 +1,54 @@
-let firstPlayer = {
-    player: 1,
-    name: 'Sub-Zero',
-    hp: 100,
-    img: 'http://reactmarathon-api.herokuapp.com/assets/subzero.gif',
-    weapon: ['Arms', 'Legs', 'Blizzard', 'Fatal Combo'],
-    attack: function() {
+import { getElement } from './utilities.js';
+
+class Player {
+    constructor ( {player, name, hp, img, rootSelector} ) {
+        this.player = player,
+        this.name = name,
+        this.hp = hp,
+        this.img = img,
+        this.rootSelector = rootSelector
+    }
+
+    changeHp ( damage ) {
+        this.hp -= damage;
+        if(this.hp < 0) this.hp = 0;
+    }
+
+    elHP () {
+        return document.querySelector( '.player' + this.player + ' .life' );
+    }
+    
+    renderHP ( $lifeBar ) {
+        $lifeBar.style.width = this.hp + '%';
+    }
+
+    attack () {
         alert(this.name + ' fight!');
-    },
+    }
 
-    changeHp,
-    elHP, 
-    renderHP,
+    createPlayer (  ) {
+        let $player = getElement('div', 'player' + this.player);
+        let $progressBar = getElement('div', 'progressbar');
+        let $character = getElement('div', 'character');
+    
+        $player.appendChild($progressBar);
+        $player.appendChild($character);
+    
+        let $life = getElement('div', 'life');
+        let $name = getElement('div', 'name');
+    
+        $progressBar.appendChild($life);
+        $progressBar.appendChild($name);
+    
+        let $characterIMG = getElement('img');
+        $character.appendChild($characterIMG);
+    
+        $life.style.width = `${this.hp}%`;
+        $name.innerText = this.name
+        $characterIMG.src = this.img;
+    
+        this.rootSelector.appendChild( $player );
+    }
 }
 
-let secondPlayer = {
-    player: 2,
-    name: 'Sonya',
-    hp: 100,
-    img: 'http://reactmarathon-api.herokuapp.com/assets/sonya.gif',
-    weapon: ['Arms', 'Legs', 'Maybe some guns', 'Fatal Combo'],
-    attack: function() {
-        alert(this.name + ' fight!');
-    },
-
-    changeHp,
-    elHP, 
-    renderHP,
-}
-
-function changeHp ( damage ) {
-    this.hp -= damage;
-    if(this.hp < 0) this.hp = 0;
-}
-
-function elHP () {
-    return document.querySelector( '.player' + this.player + ' .life' );
-}
-
-function renderHP ( $lifeBar ) {
-    $lifeBar.style.width = this.hp + '%';
-}
-
-export { firstPlayer, secondPlayer };
+export { Player };

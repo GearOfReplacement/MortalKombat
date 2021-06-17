@@ -1,4 +1,4 @@
-import { getRandom } from './utilities.js';
+import { getRandom, getBattleTime } from './utilities.js';
 
 const $chatLogs = document.querySelector('.chat');
 const logs = {
@@ -39,11 +39,6 @@ const logs = {
         '[playerKick] обманулся и жестокий [playerDefence] блокировал удар стопой в солнечное сплетение.'
     ],
     draw: 'Ничья - это тоже победа!'
-}
-
-function getBattleTime() {
-    let date = new Date();
-    return `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
 }
 
 function generateBattleLog ( logType, defendingPlayer, attackingPlayer, damageValue ) {
