@@ -1,17 +1,44 @@
 import { generateBattleLog } from './battleLogs.js';
 import { getElement, getRandom } from './utilities.js';
+import { Player } from './characters.js';
+import { Query } from './queries.js';
 
+const $arenas = document.querySelector('.arenas');
+const $fightForm = document.querySelector('.control');
 const $button = document.querySelector('.button');
-const ATTACK = ['head', 'body', 'foot'];
-const HIT = { head: 30, body: 25, foot: 20, }
 
 class Game {
-    start( $fightForm, firstPlayer, secondPlayer, $rootSelector ) {
-        $fightForm.addEventListener('submit', (e) => {
+    async start() {
+        this.createArena();
+        const queries = new Query();
+
+        const player1 = JSON.parse(localStorage.getItem('player1'));
+        const player2 = await queries.getEnemy();
+
+        let firstPlayer = new Player ({
+            ...player1,
+            player: 1,
+            rootSelector: $arenas
+        });
+
+        let secondPlayer = new Player ({
+            ...player2,
+            player: 2,
+            rootSelector: $arenas
+        });
+
+        firstPlayer.createPlayer();
+        secondPlayer.createPlayer();
+        generateBattleLog( 'start', firstPlayer, secondPlayer );
+
+        $fightForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const enemy = this.enemyAttack ();
-            const player = this.playerAttack( e.target );
+            const playerChoice = this.getPlayerAttack( e.target );
+            const resultBattle = await queries.getBattleResult( playerChoice );
+            
+            const player = resultBattle.player1;
+            const enemy = resultBattle.player2;
             
             this.checkStrikes( player, enemy, secondPlayer, firstPlayer );
             this.checkStrikes( enemy, player, firstPlayer, secondPlayer );
@@ -31,37 +58,27 @@ class Game {
                     default: generateBattleLog();
                 }
         
-                $rootSelector.appendChild( this.getTitle ( winner ) );
+                $arenas.appendChild( this.getTitle ( winner ) );
                 $button.disabled = true;
-                $rootSelector.appendChild ( this.createReloadButton() );
+                $arenas.appendChild ( this.createReloadButton() );
             };
         });
     }
 
-    enemyAttack () {
-        let hit = ATTACK[ getRandom(3) - 1 ];
-        let defence = ATTACK[ getRandom(3) - 1 ];
-    
-        return {
-            value: getRandom( HIT[hit] ),
-            hit, 
-            defence,
-        }
+    createArena () {
+        $arenas.classList.add( `arena${getRandom(5)}` );
     }
 
-    playerAttack ( target ) {
+    getPlayerAttack ( target ) {
         const attack = {};
         
         for( let item of target ) {
-            if( item.checked && item.name == 'hit' ) {
-                attack.value = getRandom( HIT[item.value] );
-                attack.hit = item.value;
-            }
+            if( item.checked && item.name == 'hit' ) attack.hit = item.value;
             if( item.checked && item.name == 'defence') attack.defence = item.value;
     
             item.checked = false;
         }
-    
+
         return attack;
     }
 
@@ -98,11 +115,10 @@ class Game {
         $reloadButton.innerText = 'Reload';
     
         $buttonWrapper.appendChild( $reloadButton );
-        $reloadButton.addEventListener( 'click', () => { window.location.reload() } );
+        $reloadButton.addEventListener( 'click', () => { window.location.pathname = 'index.html'; } );
     
         return $buttonWrapper;
     }
-
 }
 
 export {Game};
